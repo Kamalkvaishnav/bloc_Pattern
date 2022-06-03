@@ -1,7 +1,8 @@
+
 import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:meta/meta.dart';
-import '../../data/models/api_result_model.dart';
+import 'package:listview_in_blocpattern/data/models/Models.dart';
+
+
 
 //Declearing all the states of our feature
 abstract class ItemState extends Equatable {}
@@ -16,7 +17,7 @@ class ItemInitialState extends ItemState {
 }
 
 class ItemLoadedState extends ItemState {
-  FoodModel items;
+  ApiResultModel items;
   ItemLoadedState({required this.items});
 
   @override
