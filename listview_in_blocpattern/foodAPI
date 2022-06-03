@@ -1,0 +1,26 @@
+{
+    "responseCode": 200,
+    "message": "Success",
+    "data": [
+        {
+            "item_id": 1,
+            "item_name": "Veg Pakoda"
+        },
+        {
+            "item_id": 2,
+            "item_name": "Biryani" 
+        },
+        {
+            "item_id": 3,
+            "item_name": "Paneer Tikka" 
+        },
+        {
+            "item_id": 4,
+            "item_name": "Manchuriya" 
+        },
+        {
+            "item_id": 5,
+            "item_name": "Momos" 
+        }
+    ]
+}
