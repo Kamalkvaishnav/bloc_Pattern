@@ -7,24 +7,47 @@ class DatabaseManager {
       FirebaseFirestore.instance.collection('UserInfo');
   final CollectionReference chats =
       FirebaseFirestore.instance.collection('Chats');
+  final CollectionReference groups =
+      FirebaseFirestore.instance.collection('Groups');
 
   Future<void> createuser(String email, String uId, String token) async {
-    return await userList.doc(uId).set({
+    Map<String, String> map = {
       'Email': email,
       'uID': uId,
       'Token': token,
+    };
+    return await userList.doc(uId).set(map);
+    // doc(uId).set({
+    //   'Email': email,
+    //   'uID': uId,
+    //   'Token': token,
+    // });
+  }
+
+  getUserInfo(String email) async {
+    return userList.where("Email", isEqualTo: email).get().catchError((e) {
+      print(e.toString());
     });
   }
 
-  Future<void> createMessage(
-      int timestamp, String uId, String receiverToken, String message) async {
+  Future<void> createMessage(int timestamp, String uId, dynamic receiverToken,
+      String message, String chatroomId, dynamic senderEmail) async {
     int tdata = DateTime.now().millisecondsSinceEpoch;
-    return await chats.doc('${timestamp}').set({
+    return await chats
+        .doc(chatroomId)
+        .collection("chatroom")
+        .doc('${timestamp}')
+        .set({
       'timestamp': tdata,
       'uID': uId,
       'receiver_token': receiverToken,
       'Message': message,
+      'senderEmail': senderEmail
     });
+
+    // return await chats.doc(chatroomId).collection("chatroom").doc('${timestamp}').set(chatmessageMap).catchError((e){
+    //       print(e.toString());
+    // });
   }
 
   Future fetchUserList() async {
@@ -41,10 +64,29 @@ class DatabaseManager {
     }
   }
 
-  Future fetchMessages() async {
+  Future fetchGroupList() async {
+    List groupList = [];
+    try {
+      await groups.get().then((value) {
+        value.docs.forEach((element) {
+          groupList.add(element.data());
+        });
+      });
+      return groupList;
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future fetchMessages(String chatroomId) async {
     List messageList = [];
     try {
-      await chats.orderBy('timestamp', descending: true).get().then((value) {
+      await chats
+          .doc(chatroomId)
+          .collection("chatroom")
+          .orderBy('timestamp', descending: true)
+          .get()
+          .then((value) {
         value.docs.forEach((element) {
           messageList.add(element.data());
         });
@@ -55,6 +97,27 @@ class DatabaseManager {
     }
   }
 
-  //
-  
+  Future<bool>? addChatRoom(chatRoom, chatRoomId) {
+    FirebaseFirestore.instance
+        .collection("Chats")
+        .doc(chatRoomId)
+        .set(chatRoom)
+        .catchError((e) {
+      print(e);
+    });
+    return null;
+  }
+
+  Future<void> createGroup(String groupName, String senderUId,
+      List<String> receiverEmails, List<String> receiverToken) async {
+      return await groups
+        .doc(groupName)
+        .set({
+      'group_name': groupName,
+      'admin_uID': senderUId,
+      'receiver_emails': receiverEmails,
+      'receiver_token': receiverToken
+      
+    });
+  }
 }

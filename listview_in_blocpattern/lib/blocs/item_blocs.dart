@@ -18,12 +18,12 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     //On fuction reads the Event and return the corresponding States using emit
     on<SendMessage>((event, emit) async {
       emit(ItemLoadingState());
-      try {
+      // try {
         ApiResultModel items = await repository.sendMessage(event.token, event.title, event.body);
         emit(ItemLoadedState(items: items));
-       } catch (e) {
-        emit(ItemErrorState(message: e.toString()));
-      }
+      //  } catch (e) {
+        // emit(ItemErrorState(message: e.toString()));
+      // }
     });
   }
   

@@ -45,6 +45,9 @@ dependencies:
   flutter_bloc: ^8.0.1
   fluttertoast: ^8.0.9
   firebase_in_app_messaging: ^0.6.0+15
+  firebase_analytics: ^9.1.9
+  bloc: ^8.0.3
+  shared_preferences: ^2.0.15
   
 
 dev_dependencies:

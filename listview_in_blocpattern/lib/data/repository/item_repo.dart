@@ -8,14 +8,14 @@ import '../../res/API.dart';
 // Main class for the ItemRepository
 abstract class ItemRepository {
   //getData is the function to get the data from the API, and return in the type of FoodModel
-  Future<ApiResultModel> sendMessage(String token, String title, String body);
+  Future<ApiResultModel> sendMessage(dynamic token, String title, String body);
 }
 
 //Subclass of the ItemRepository
 class ItemRepositoryImpl implements ItemRepository {
   @override
   Future<ApiResultModel> sendMessage(
-      String token, String title, String body) async {
+      dynamic token, String title, String body) async {
     final response = await http.post(
       Uri.parse(AppStrings.apikey),
       headers: <String, String>{
@@ -24,7 +24,7 @@ class ItemRepositoryImpl implements ItemRepository {
             'key=AAAAfIAwgFg:APA91bHs-PUH5lXteAK03p-srZHZWSuLOVVouhJXGv1Qv4NE-ySaEufvoyX2uhPCbM9rmr2mQVHQJ0XEYQ3CswwtCw0Jw-w81RVsBeoWUJ838t5fXke3F0P-j_NLYm4m8du9-ZOypYFb'
       },
       body: jsonEncode(<String, dynamic>{
-        'to': token,
+        'registration_ids': token,
         "content_available": true,
         "notification": {
           "title": title,

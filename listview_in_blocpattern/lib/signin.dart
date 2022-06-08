@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:listview_in_blocpattern/SignUpPage.dart';
 import 'package:listview_in_blocpattern/auth_service.dart';
+import 'package:listview_in_blocpattern/database_manager.dart';
+import 'package:listview_in_blocpattern/home_page.dart';
 import 'package:provider/provider.dart';
 
 class SignInPage extends StatefulWidget {
@@ -8,6 +11,7 @@ class SignInPage extends StatefulWidget {
   @override
   State<SignInPage> createState() => _SignInPageState();
 }
+
 class _SignInPageState extends State<SignInPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -38,6 +42,9 @@ class _SignInPageState extends State<SignInPage> {
               ),
             ),
           ),
+          SizedBox(
+            height: 20,
+          ),
           Container(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: TextField(
@@ -58,9 +65,24 @@ class _SignInPageState extends State<SignInPage> {
               child: ElevatedButton(
                 child: const Text('Login'),
                 onPressed: () {
-                  context.read<AuthService>().signIn(
+                context.read<AuthService>().signIn(
                       email: emailController.text.trim(),
                       password: passwordController.text.trim());
+                // Navigator.push(context,
+                //       MaterialPageRoute(builder: (context) => HomePage()));
+                },
+              )),
+          SizedBox(
+            height: 20,
+          ),
+          Container(
+              height: 50,
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+              child: ElevatedButton(
+                child: const Text('SignUp'),
+                onPressed: () {
+                  // Navigator.push(context,
+                  //     MaterialPageRoute(builder: (context) => SignUpPage()));
                 },
               )),
           SizedBox(
