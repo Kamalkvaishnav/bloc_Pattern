@@ -5,12 +5,11 @@ class MultiSelect extends StatefulWidget {
   final List<String> userEmails;
   String senderUID;
 
-  MultiSelect(
-      {Key? key,
-      required this.userEmails,
-      required this.senderUID,
-      })
-      : super(key: key);
+  MultiSelect({
+    Key? key,
+    required this.userEmails,
+    required this.senderUID,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _MultiSelectState();
@@ -39,17 +38,16 @@ class _MultiSelectState extends State<MultiSelect> {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < result.length; j++) {
         if (emailsList[i] == result[j]['Email']) {
-          receiverTokens.add(result[j]['Token']);
+          receiverTokens.add(result[j]['Token'][0]);
         }
       }
     }
 
-    for (int i = 0; i < result.length; i++){
-      if (widget.senderUID== result[i]['Email']){
-        receiverTokens.add(result[i]['Token']);
+    for (int i = 0; i < result.length; i++) {
+      if (widget.senderUID == result[i]['Email']) {
+        receiverTokens.add(result[i]['Token'][0]);
       }
     }
-      print('this is receiver token list' + receiverTokens.toString());
     return receiverTokens;
   }
 

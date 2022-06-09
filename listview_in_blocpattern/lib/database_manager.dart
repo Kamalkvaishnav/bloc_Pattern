@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
 
 class DatabaseManager {
   final CollectionReference userList =
@@ -10,18 +8,13 @@ class DatabaseManager {
   final CollectionReference groups =
       FirebaseFirestore.instance.collection('Groups');
 
-  Future<void> createuser(String email, String uId, String token) async {
-    Map<String, String> map = {
+  Future<void> createuser(String email, String uId, List<String> token) async {
+    Map<String, dynamic> map = {
       'Email': email,
       'uID': uId,
       'Token': token,
     };
     return await userList.doc(uId).set(map);
-    // doc(uId).set({
-    //   'Email': email,
-    //   'uID': uId,
-    //   'Token': token,
-    // });
   }
 
   getUserInfo(String email) async {
@@ -30,7 +23,7 @@ class DatabaseManager {
     });
   }
 
-  Future<void> createMessage(int timestamp, String uId, dynamic receiverToken,
+  Future<void> createMessage(int timestamp, String uId, List receiverToken,
       String message, String chatroomId, dynamic senderEmail) async {
     int tdata = DateTime.now().millisecondsSinceEpoch;
     return await chats
@@ -44,10 +37,6 @@ class DatabaseManager {
       'Message': message,
       'senderEmail': senderEmail
     });
-
-    // return await chats.doc(chatroomId).collection("chatroom").doc('${timestamp}').set(chatmessageMap).catchError((e){
-    //       print(e.toString());
-    // });
   }
 
   Future fetchUserList() async {
@@ -110,14 +99,11 @@ class DatabaseManager {
 
   Future<void> createGroup(String groupName, String senderUId,
       List<String> receiverEmails, List<String> receiverToken) async {
-      return await groups
-        .doc(groupName)
-        .set({
+    return await groups.doc(groupName).set({
       'group_name': groupName,
       'admin_uID': senderUId,
       'receiver_emails': receiverEmails,
       'receiver_token': receiverToken
-      
     });
   }
 }

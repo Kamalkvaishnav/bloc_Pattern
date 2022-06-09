@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List Users = [];
+  List<dynamic> Users = [];
   List<dynamic> groups = [];
   List<String> userEmails = [];
   String currUserEmail = '';
@@ -37,9 +36,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         groups = resultGroups;
       });
-      print(groups.length);
     }
-    print(groups);
     return groups;
   }
 
@@ -51,10 +48,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         Users = resultUsers;
       });
-      print(Users.length);
     }
     for (int i = 0; i < Users.length; i++) {
-      print(Users[i]['Email']);
       if (currUserEmail == Users[i]['Email']) {
         continue;
       } else {
@@ -63,7 +58,6 @@ class _HomePageState extends State<HomePage> {
         });
       }
     }
-    print('This is userEmails' + userEmails.toString());
     return Users;
   }
 
@@ -90,7 +84,6 @@ class _HomePageState extends State<HomePage> {
                             builder: (BuildContext context) => MultiSelect(
                                   senderUID: user.email,
                                   userEmails: userEmails,
-                                  
                                 )));
                   }),
                   child: Text('+ Grp')),
@@ -105,6 +98,8 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+        // there is the name of t
+
         body: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -163,11 +158,5 @@ getChatRoomId(String a, String b) {
       return "$a\_$b";
     }
   }
-  // if (a.substring(0, 1).codeUnitAt(0) > b.substring(0, 1).codeUnitAt(0)) {
-  //   return "$b\_$a";
-  // } else if (a.substring(0, 1).codeUnitAt(0) <b.substring(0, 1).codeUnitAt(0)) {
-  //   return "$a\_$b";
-  // } else {
-  //  return getChatRoomId(a.substring(1, a.length - 1), b.substring(1, b.length - 1));
-  // }
+
 }

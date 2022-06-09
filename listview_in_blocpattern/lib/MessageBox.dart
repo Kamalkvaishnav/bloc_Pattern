@@ -1,5 +1,3 @@
-// ignore_for_file: use_key_in_widget_constructors
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:listview_in_blocpattern/blocs/item_state.dart';
 import 'package:listview_in_blocpattern/data/models/Models.dart';
@@ -7,18 +5,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:listview_in_blocpattern/database_manager.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'blocs/item_blocs.dart';
 import 'blocs/item_events.dart';
 
 class MessageBox extends StatefulWidget {
-  dynamic token;
   
-  //ChatroomId
-  String chatroomID;
+  List token;
+  String chatroomID;//ChatroomId
   String receiver;
+
   MessageBox(
-      {required this.token, required this.chatroomID, required this.receiver});
+      {Key? key, required this.token, required this.chatroomID, required this.receiver}) : super(key: key);
+      
   @override
   State<MessageBox> createState() => _MessageBoxState();
 }
@@ -28,7 +26,6 @@ final TextEditingController msgController = TextEditingController();
 class _MessageBoxState extends State<MessageBox> {
   List Messages = [];
   late ItemBloc itemBloc;
-
   List<Results> fooditems = [];
 
   @override
@@ -46,18 +43,11 @@ class _MessageBoxState extends State<MessageBox> {
       setState(() {
         Messages = result;
       });
-      print(Messages.length);
       return Messages;
     }
   }
 
-  _sendMessageArea(dynamic SenderUID, dynamic senderEmail, dynamic token, String chatroomID) {
-    // Map<String, dynamic> chatmessageMap = {
-    //   "SenderUid": SenderUID,
-    //   "message":  msgController.text.trim(),
-    //   "Receiver token": token,
-    //   "time": DateTime.now().millisecondsSinceEpoch,
-    // };
+  _sendMessageArea(dynamic SenderUID, dynamic senderEmail, List token, String chatroomID) {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         height: 70,
@@ -79,6 +69,7 @@ class _MessageBoxState extends State<MessageBox> {
             ),
             FloatingActionButton(
               onPressed: () {
+                
                 int timedata = DateTime.now().millisecondsSinceEpoch;
                 DatabaseManager().createMessage(timedata, SenderUID, token,
                     msgController.text.trim(), chatroomID, senderEmail);
@@ -88,9 +79,11 @@ class _MessageBoxState extends State<MessageBox> {
                     token: widget.token,
                     title: 'You got new Message',
                     body: msgController.text.trim()));
+
                 msgController.clear();
                 fetchMessages(widget.chatroomID);
               },
+
               backgroundColor: Colors.blue,
               elevation: 0,
               child: const Icon(
@@ -114,7 +107,7 @@ class _MessageBoxState extends State<MessageBox> {
           title: ListTile(
             title: Text(widget.receiver),
             leading:
-                CircleAvatar(backgroundImage: AssetImage('assets/chat.png')),
+               const CircleAvatar(backgroundImage: AssetImage('assets/chat.png')),
           ),
         ),
         resizeToAvoidBottomInset: true,
@@ -189,7 +182,7 @@ class _MessageBoxState extends State<MessageBox> {
                             child: Column(
                               children: [Text(Messages[index]['senderEmail'], style:const TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.bold),) ,Text(
                                  Messages[index]['Message'],
-                                style: TextStyle(fontSize: 15),
+                                style: const TextStyle(fontSize: 15),
                               ),] 
                             ),
                           ),

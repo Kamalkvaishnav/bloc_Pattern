@@ -22,7 +22,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
         ApiResultModel items = await repository.sendMessage(event.token, event.title, event.body);
         emit(ItemLoadedState(items: items));
       //  } catch (e) {
-        // emit(ItemErrorState(message: e.toString()));
+      //   emit(ItemErrorState(message: e.toString()));
       // }
     });
   }

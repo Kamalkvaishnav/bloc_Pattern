@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:listview_in_blocpattern/SignUpPage.dart';
 import 'package:listview_in_blocpattern/auth_service.dart';
 import 'package:listview_in_blocpattern/database_manager.dart';
 import 'package:listview_in_blocpattern/home_page.dart';
@@ -9,8 +8,6 @@ import 'package:listview_in_blocpattern/signin.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:firebase_in_app_messaging/firebase_in_app_messaging.dart';
-
 
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel', 'High Importance Notification',
@@ -79,12 +76,12 @@ class AuthanticationWrapper extends StatefulWidget {
 }
 
 class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
-  String userToken = '';
+  List<String> userToken = [];
 
   @override
   void initState() {
     SendToken();
-    
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       RemoteNotification notification =
           message.notification?.android as RemoteNotification;
@@ -112,32 +109,23 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
 
   SendToken() async {
     await FirebaseMessaging.instance.getToken().then((value) {
-      
       setState(() {
-        userToken = value!;
+        userToken.add(value!);
       });
-      print('This is Token: -----> ' + userToken);
       return userToken;
     });
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
     final appuser = context.watch<User?>();
 
     if (appuser != null) {
-
-      // if (userToken != '') {
-
-        DatabaseManager().createuser(appuser.email!, appuser.uid, userToken);
-      // }
+      DatabaseManager().createuser(appuser.email!, appuser.uid, userToken);
 
       return const HomePage();
     } else {
       return const SignInPage();
-      
     }
   }
 }
