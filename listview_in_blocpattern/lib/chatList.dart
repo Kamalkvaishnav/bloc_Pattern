@@ -39,6 +39,9 @@ class _ChatListState extends State<ChatList> {
     };
 
     databaseManager.addChatRoom(chatRoom, chatroomId);
+       print(widget.receieverTokens);
+          print(widget.chatroomId);
+          print(widget.receiver);
     Navigator.push(
         context,
         MaterialPageRoute(

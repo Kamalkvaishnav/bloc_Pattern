@@ -9,14 +9,17 @@ import 'blocs/item_blocs.dart';
 import 'blocs/item_events.dart';
 
 class MessageBox extends StatefulWidget {
-  
   List token;
-  String chatroomID;//ChatroomId
+  String chatroomID; //ChatroomId
   String receiver;
 
   MessageBox(
-      {Key? key, required this.token, required this.chatroomID, required this.receiver}) : super(key: key);
-      
+      {Key? key,
+      required this.token,
+      required this.chatroomID,
+      required this.receiver})
+      : super(key: key);
+
   @override
   State<MessageBox> createState() => _MessageBoxState();
 }
@@ -27,6 +30,7 @@ class _MessageBoxState extends State<MessageBox> {
   List Messages = [];
   late ItemBloc itemBloc;
   List<Results> fooditems = [];
+  List<dynamic> resultsForSenderToken = [];
 
   @override
   void initState() {
@@ -45,9 +49,14 @@ class _MessageBoxState extends State<MessageBox> {
       });
       return Messages;
     }
+    dynamic resultsforsendertoken = await DatabaseManager().fetchUserList();
+    setState(() {
+      resultsForSenderToken = resultsforsendertoken;
+    });
   }
 
-  _sendMessageArea(dynamic SenderUID, dynamic senderEmail, List token, String chatroomID) {
+  _sendMessageArea(dynamic SenderUID, dynamic senderEmail, List token,
+      String chatroomID, List<dynamic> resultsForSenderToken) {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         height: 70,
@@ -69,21 +78,33 @@ class _MessageBoxState extends State<MessageBox> {
             ),
             FloatingActionButton(
               onPressed: () {
-                
                 int timedata = DateTime.now().millisecondsSinceEpoch;
                 DatabaseManager().createMessage(timedata, SenderUID, token,
                     msgController.text.trim(), chatroomID, senderEmail);
+                dynamic senderToken;
+
+                for (int i = 0; i < resultsForSenderToken.length; i++) {
+                  if (senderEmail == resultsForSenderToken[i]['Email']) {
+                    senderToken = resultsForSenderToken[i]['Token'];
+                    
+                  }
+                }
+                setState(() {
+                  
+                });
                 //We are adding FetchItemEvent in our ItemBloc
-                
+
                 itemBloc.add(SendMessage(
                     token: widget.token,
-                    title: 'You got new Message',
-                    body: msgController.text.trim()));
+                    title: senderEmail,
+                    body: msgController.text.trim(),
+                    chatRoomID: widget.chatroomID,
+                    senderToken: senderToken,
+                    SenderEmail: senderEmail));
 
                 msgController.clear();
                 fetchMessages(widget.chatroomID);
               },
-
               backgroundColor: Colors.blue,
               elevation: 0,
               child: const Icon(
@@ -106,14 +127,12 @@ class _MessageBoxState extends State<MessageBox> {
           backgroundColor: Color.fromARGB(255, 112, 121, 181),
           title: ListTile(
             title: Text(widget.receiver),
-            leading:
-               const CircleAvatar(backgroundImage: AssetImage('assets/chat.png')),
+            leading: const CircleAvatar(
+                backgroundImage: AssetImage('assets/chat.png')),
           ),
         ),
         resizeToAvoidBottomInset: true,
-        body:
-
-        BlocListener<ItemBloc, ItemState>(
+        body: BlocListener<ItemBloc, ItemState>(
           listener: (context, state) => {
             if (state is ItemErrorState) {Text("Something went wrong :(")}
           },
@@ -152,9 +171,7 @@ class _MessageBoxState extends State<MessageBox> {
                     );
                 print('You send a message to user!');
               }
-              return
-
-               Column(children: <Widget>[
+              return Column(children: <Widget>[
                 Expanded(
                   child: ListView.builder(
                     itemCount: Messages.length,
@@ -167,10 +184,9 @@ class _MessageBoxState extends State<MessageBox> {
                         padding: const EdgeInsets.only(
                             left: 14, right: 14, top: 10, bottom: 10),
                         child: Align(
-                          alignment:
-                              (Messages[index]['uID'] != SenderUID
-                                  ? Alignment.topLeft
-                                  : Alignment.topRight),
+                          alignment: (Messages[index]['uID'] != SenderUID
+                              ? Alignment.topLeft
+                              : Alignment.topRight),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
@@ -179,25 +195,32 @@ class _MessageBoxState extends State<MessageBox> {
                                   : Colors.blue[200]),
                             ),
                             padding: EdgeInsets.all(16),
-                            child: Column(
-                              children: [Text(Messages[index]['senderEmail'], style:const TextStyle(fontSize: 13, color: Colors.black, fontWeight: FontWeight.bold),) ,Text(
-                                 Messages[index]['Message'],
+                            child: Column(children: [
+                              Text(
+                                Messages[index]['senderEmail'],
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                Messages[index]['Message'],
                                 style: const TextStyle(fontSize: 15),
-                              ),] 
-                            ),
+                              ),
+                            ]),
                           ),
                         ),
                       );
                     },
                   ),
                 ),
-                _sendMessageArea(SenderUID, senderEmail, widget.token, widget.chatroomID),
+                _sendMessageArea(SenderUID, senderEmail, widget.token,
+                    widget.chatroomID, resultsForSenderToken),
               ]);
               ;
             },
           ),
-        )
-        );
+        ));
   }
 }
 

@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:listview_in_blocpattern/MessageBox.dart';
 import 'package:listview_in_blocpattern/auth_service.dart';
 import 'package:listview_in_blocpattern/database_manager.dart';
 import 'package:listview_in_blocpattern/home_page.dart';
@@ -9,30 +14,20 @@ import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'high_importance_channel', 'High Importance Notification',
-    importance: Importance.high, playSound: true);
+import 'blocs/item_blocs.dart';
+import 'data/repository/item_repo.dart';
+import 'notification_setvice/local_notification.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-Future<void> _firebaseMeesagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  print('A bg message just showed up :  ${message.messageId}');
+Future<void> backgroundHandler(RemoteMessage message) async {
+  print(message.data.toString());
+  print(message.notification!.title);
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMeesagingBackgroundHandler);
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
-
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-      alert: true, badge: true, sound: true);
+  FirebaseMessaging.onBackgroundMessage(backgroundHandler);
+  LocalNotificationService.initialize();
   runApp(const MyApp());
 }
 
@@ -81,30 +76,86 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
   @override
   void initState() {
     SendToken();
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification notification =
-          message.notification?.android as RemoteNotification;
-      AndroidNotification? android = message.notification?.android;
-
-      print('Got a message whilst in the foreground!');
-      print('Message data: ${message.data}');
-
-      if (notification != null && android != null) {
-        flutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-                android: AndroidNotificationDetails(channel.id, channel.name,
-                    color: Colors.blue,
-                    playSound: true,
-                    icon: '@mipmap/ic_launcher')));
-        print('Message also contained a notification: ${message.notification}');
-      }
-    });
-
     super.initState();
+
+    // 1. This method call when app in terminated state and you get a notification
+    // when you click on notification app open from terminated state and you can get notification data in this method
+
+    FirebaseMessaging.instance.getInitialMessage().then(
+      (message) {
+        print("FirebaseMessaging.instance.getInitialMessage");
+        if (message != null) {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                  create: (context) =>
+                      ItemBloc(repository: ItemRepositoryImpl()),
+                  child: MessageBox(
+                    //this token is users token
+                    token: jsonDecode(message.data['SenderToken']),
+                    chatroomID: message.data['ChatRoomID'],
+                    receiver: message.data['Receiver'],
+                  ))));
+        }
+      },
+    );
+
+    // 2. This method only call when App in forground it mean app must be opened
+    FirebaseMessaging.onMessage.listen(
+      (message) {
+        print("FirebaseMessaging.onMessage.listen");
+        if (message.notification != null) {
+          print(message.notification!.title);
+          print(message.notification!.body);
+          print("message.data11 ${message.data}");
+          LocalNotificationService.createanddisplaynotification(message);
+        }
+        if (message != null) {
+          print(message.data['ChatRoomID']);
+          print(message.data['Receiver']);
+          print(jsonDecode(message.data['SenderToken']));
+
+          Navigator.push(context, MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                  create: (context) =>
+                      ItemBloc(repository: ItemRepositoryImpl()),
+                  child: MessageBox(
+                    //this token is users token
+                    token: jsonDecode(message.data['SenderToken']),
+                    chatroomID: message.data['ChatRoomID'],
+                    receiver: message.data['Receiver'],
+                  ))));
+        }
+      },
+    );
+
+    // 3. This method only call when App in background and not terminated(not closed)
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) {
+        print("FirebaseMessaging.onMessageOpenedApp.listen");
+        if (message.notification != null) {
+          print(message.notification!.title);
+          print(message.notification!.body);
+          print("message.data22 ${message.data['ChatRoomID']}");
+        }
+        if (message != null) {
+          print(message.data['SenderToken']);
+          print(message.data['ChatRoomID']);
+          print(message.data['Receiver']);
+
+          Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                      create: (context) =>
+                          ItemBloc(repository: ItemRepositoryImpl()),
+                      child: MessageBox(
+                        //this token is users token
+                        token: jsonDecode(message.data['SenderToken']),
+                        chatroomID: message.data['ChatRoomID'],
+                        receiver: message.data['Receiver'],
+                      ))));
+        }
+      },
+    );
   }
 
   SendToken() async {
