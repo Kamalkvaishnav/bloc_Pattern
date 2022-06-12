@@ -10,6 +10,7 @@ import 'package:listview_in_blocpattern/auth_service.dart';
 import 'package:listview_in_blocpattern/database_manager.dart';
 import 'package:listview_in_blocpattern/home_page.dart';
 import 'package:listview_in_blocpattern/signin.dart';
+import 'package:navigation_history_observer/navigation_history_observer.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -23,12 +24,43 @@ Future<void> backgroundHandler(RemoteMessage message) async {
   print(message.notification!.title);
 }
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(backgroundHandler);
   LocalNotificationService.initialize();
+  listenNotifications();
   runApp(const MyApp());
+}
+
+void listenNotifications() {
+  LocalNotificationService.onNotification.stream.listen(onClickedNotification);
+}
+
+void onClickedNotification(String? payload) {
+  print('OnClickedNotification and messageData is below ======>>>>>');
+  List<String> temp = payload!.split('#');
+  dynamic tokenfromtemp;
+  List list = jsonDecode(temp[0]);
+  print(list.length);
+  if (list.length > 1) {
+    tokenfromtemp = list;
+  } else {
+    tokenfromtemp = temp[0];
+  }
+
+  print((temp[0]));
+  Navigator.of(navigatorKey.currentContext!).push(MaterialPageRoute(
+      builder: (context) => BlocProvider(
+          create: (context) => ItemBloc(repository: ItemRepositoryImpl()),
+          child: MessageBox(
+            //this token is users token
+            token: [tokenfromtemp],
+            chatroomID: temp[1],
+            receiver: temp[2],
+          ))));
 }
 
 class MyApp extends StatefulWidget {
@@ -52,6 +84,8 @@ class _MyAppState extends State<MyApp> {
         )
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
+        navigatorObservers: [NavigationHistoryObserver()],
         debugShowCheckedModeBanner: false,
         title: 'Chat App',
         theme: ThemeData(
@@ -84,18 +118,7 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
     FirebaseMessaging.instance.getInitialMessage().then(
       (message) {
         print("FirebaseMessaging.instance.getInitialMessage");
-        if (message != null) {
-          Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => BlocProvider(
-                  create: (context) =>
-                      ItemBloc(repository: ItemRepositoryImpl()),
-                  child: MessageBox(
-                    //this token is users token
-                    token: jsonDecode(message.data['SenderToken']),
-                    chatroomID: message.data['ChatRoomID'],
-                    receiver: message.data['Receiver'],
-                  ))));
-        }
+       
       },
     );
 
@@ -103,27 +126,12 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
     FirebaseMessaging.onMessage.listen(
       (message) {
         print("FirebaseMessaging.onMessage.listen");
+   
         if (message.notification != null) {
           print(message.notification!.title);
           print(message.notification!.body);
           print("message.data11 ${message.data}");
           LocalNotificationService.createanddisplaynotification(message);
-        }
-        if (message != null) {
-          print(message.data['ChatRoomID']);
-          print(message.data['Receiver']);
-          print(jsonDecode(message.data['SenderToken']));
-
-          Navigator.push(context, MaterialPageRoute(
-              builder: (context) => BlocProvider(
-                  create: (context) =>
-                      ItemBloc(repository: ItemRepositoryImpl()),
-                  child: MessageBox(
-                    //this token is users token
-                    token: jsonDecode(message.data['SenderToken']),
-                    chatroomID: message.data['ChatRoomID'],
-                    receiver: message.data['Receiver'],
-                  ))));
         }
       },
     );
@@ -131,28 +139,12 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
     // 3. This method only call when App in background and not terminated(not closed)
     FirebaseMessaging.onMessageOpenedApp.listen(
       (message) {
+      
         print("FirebaseMessaging.onMessageOpenedApp.listen");
         if (message.notification != null) {
           print(message.notification!.title);
           print(message.notification!.body);
           print("message.data22 ${message.data['ChatRoomID']}");
-        }
-        if (message != null) {
-          print(message.data['SenderToken']);
-          print(message.data['ChatRoomID']);
-          print(message.data['Receiver']);
-
-          Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                      create: (context) =>
-                          ItemBloc(repository: ItemRepositoryImpl()),
-                      child: MessageBox(
-                        //this token is users token
-                        token: jsonDecode(message.data['SenderToken']),
-                        chatroomID: message.data['ChatRoomID'],
-                        receiver: message.data['Receiver'],
-                      ))));
         }
       },
     );

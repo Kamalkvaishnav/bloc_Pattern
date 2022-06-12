@@ -27,7 +27,7 @@ class ItemRepositoryImpl implements ItemRepository {
         "notification": {
           "title": "Message for you in Group",
           "body": body,
-          "click_action": "fcm.ACTION.HELLO"
+          "click_action": "FLUTTER_NOTIFICATION_CLICK"
         },
         "data": {"ChatRoomID": chatRoomID,
         "SenderToken": token,
@@ -41,7 +41,7 @@ class ItemRepositoryImpl implements ItemRepository {
         "notification": {
           "title": "Message for you !!",
           "body": body,
-          "click_action": "fcm.ACTION.HELLO"
+          "click_action": "FLUTTER_NOTIFICATION_CLICK"
         },
         "data": {"ChatRoomID": chatRoomID,
         "SenderToken" : senderToken,

@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:listview_in_blocpattern/blocs/item_state.dart';
 import 'package:listview_in_blocpattern/data/models/Models.dart';
@@ -12,6 +13,7 @@ class MessageBox extends StatefulWidget {
   List token;
   String chatroomID; //ChatroomId
   String receiver;
+  dynamic senderToken;
 
   MessageBox(
       {Key? key,
@@ -30,10 +32,16 @@ class _MessageBoxState extends State<MessageBox> {
   List Messages = [];
   late ItemBloc itemBloc;
   List<Results> fooditems = [];
-  List<dynamic> resultsForSenderToken = [];
+
+  dynamic senderToken;
 
   @override
   void initState() {
+    FirebaseMessaging.instance.getToken().then((value){
+      setState(() {
+        senderToken = value;
+      });
+    },);
     fetchMessages(widget.chatroomID);
     super.initState();
     itemBloc = BlocProvider.of<ItemBloc>(context);
@@ -49,14 +57,11 @@ class _MessageBoxState extends State<MessageBox> {
       });
       return Messages;
     }
-    dynamic resultsforsendertoken = await DatabaseManager().fetchUserList();
-    setState(() {
-      resultsForSenderToken = resultsforsendertoken;
-    });
+ 
   }
 
   _sendMessageArea(dynamic SenderUID, dynamic senderEmail, List token,
-      String chatroomID, List<dynamic> resultsForSenderToken) {
+      String chatroomID) {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         height: 70,
@@ -81,17 +86,17 @@ class _MessageBoxState extends State<MessageBox> {
                 int timedata = DateTime.now().millisecondsSinceEpoch;
                 DatabaseManager().createMessage(timedata, SenderUID, token,
                     msgController.text.trim(), chatroomID, senderEmail);
-                dynamic senderToken;
+                
 
-                for (int i = 0; i < resultsForSenderToken.length; i++) {
-                  if (senderEmail == resultsForSenderToken[i]['Email']) {
-                    senderToken = resultsForSenderToken[i]['Token'];
+              
+
+                // for (int i = 0; i < resultsForSenderToken.length; i++) {
+                //   if (senderEmail == resultsForSenderToken[i]['Email']) {
+                //     senderToken = resultsForSenderToken[i]['Token'];
                     
-                  }
-                }
-                setState(() {
-                  
-                });
+                //   }
+                // }
+          
                 //We are adding FetchItemEvent in our ItemBloc
 
                 itemBloc.add(SendMessage(
@@ -215,7 +220,7 @@ class _MessageBoxState extends State<MessageBox> {
                   ),
                 ),
                 _sendMessageArea(SenderUID, senderEmail, widget.token,
-                    widget.chatroomID, resultsForSenderToken),
+                    widget.chatroomID),
               ]);
               ;
             },
