@@ -24,11 +24,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     fetchuserInfo();
-    fetchGroupList();
+    _fetchGroupList();
     super.initState();
   }
 
-  fetchGroupList() async {
+  _fetchGroupList() async {
     dynamic resultGroups = await DatabaseManager().fetchGroupList();
     if (resultGroups == null) {
       print('Error in retriving UserData');

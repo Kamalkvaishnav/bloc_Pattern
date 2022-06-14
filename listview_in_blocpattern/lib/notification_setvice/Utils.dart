@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 
+// this is the fucntion to download the image before sending the notification 
 class Utils {
   static Future<String> downloadFile(String url, String fileName) async {
     final directory = await getApplicationDocumentsDirectory();

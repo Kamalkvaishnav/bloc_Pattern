@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:math';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,8 +12,6 @@ import 'package:listview_in_blocpattern/signin.dart';
 import 'package:navigation_history_observer/navigation_history_observer.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import 'blocs/item_blocs.dart';
 import 'data/repository/item_repo.dart';
 import 'notification_setvice/local_notification.dart';
@@ -26,13 +23,24 @@ Future<void> backgroundHandler(RemoteMessage message) async {
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(backgroundHandler);
   LocalNotificationService.initialize();
   listenNotifications();
+  HttpOverrides.global = new MyHttpOverrides();
   runApp(const MyApp());
+  
 }
 
 void listenNotifications() {
@@ -43,16 +51,16 @@ void onClickedNotification(String? payload) {
   print('OnClickedNotification and messageData is below ======>>>>>');
   List<String> temp = payload!.split('#');
   dynamic tokenfromtemp;
-  List list = jsonDecode(temp[0]);
-  print(list.length);
-  if (list.length > 1) {
-    tokenfromtemp = list;
+  if (temp[0] == "[") {
+    tokenfromtemp = jsonDecode(temp[0]);
   } else {
     tokenfromtemp = temp[0];
   }
 
+  
+
   print((temp[0]));
-  Navigator.of(navigatorKey.currentContext!).push(MaterialPageRoute(
+  Navigator.of(navigatorKey.currentContext!).pushReplacement(MaterialPageRoute(
       builder: (context) => BlocProvider(
           create: (context) => ItemBloc(repository: ItemRepositoryImpl()),
           child: MessageBox(
@@ -118,7 +126,6 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
     FirebaseMessaging.instance.getInitialMessage().then(
       (message) {
         print("FirebaseMessaging.instance.getInitialMessage");
-       
       },
     );
 
@@ -126,7 +133,7 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
     FirebaseMessaging.onMessage.listen(
       (message) {
         print("FirebaseMessaging.onMessage.listen");
-   
+
         if (message.notification != null) {
           print(message.notification!.title);
           print(message.notification!.body);
@@ -139,7 +146,6 @@ class _AuthanticationWrapperState extends State<AuthanticationWrapper> {
     // 3. This method only call when App in background and not terminated(not closed)
     FirebaseMessaging.onMessageOpenedApp.listen(
       (message) {
-      
         print("FirebaseMessaging.onMessageOpenedApp.listen");
         if (message.notification != null) {
           print(message.notification!.title);

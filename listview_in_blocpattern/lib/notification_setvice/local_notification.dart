@@ -29,7 +29,7 @@ class LocalNotificationService {
       },
     );
   }
-
+//this is the next thing that we are going that we are going in that manner this is thhe next that is discoverd in our application 
   static void createanddisplaynotification(RemoteMessage message) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -53,7 +53,7 @@ class LocalNotificationService {
           priority: Priority.high,
         ),
       );
-
+// this function shows up the notification when our app is in the background 
       await _notificationsPlugin.show(
         id,
         message.notification!.title,
@@ -63,7 +63,6 @@ class LocalNotificationService {
             '${message.data['SenderToken']}#${message.data['ChatRoomID']}#${message.data['Receiver']}',
       );
       print('Payload is this ++++>>>>');
-
       print(message.data.toString());
     } on Exception catch (e) {
       print(e);

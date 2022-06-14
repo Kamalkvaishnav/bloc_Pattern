@@ -24,10 +24,13 @@ class ItemRepositoryImpl implements ItemRepository {
       bodyforNotification = {
         "registration_ids": token,
         "content_available": true,
+        "priority": "high",
+        
         "notification": {
           "title": "Message for you in Group",
           "body": body,
-          "click_action": "FLUTTER_NOTIFICATION_CLICK"
+          "click_action": "FLUTTER_NOTIFICATION_CLICK",
+          "android_channel_id": "chatAppInFlutter"
         },
         "data": {"ChatRoomID": chatRoomID,
         "SenderToken": token,
@@ -38,10 +41,13 @@ class ItemRepositoryImpl implements ItemRepository {
       bodyforNotification = {
         "to": token[0],
         "content_available": true,
+      
+        "priority": "high",
         "notification": {
           "title": "Message for you !!",
           "body": body,
-          "click_action": "FLUTTER_NOTIFICATION_CLICK"
+          "click_action": "FLUTTER_NOTIFICATION_CLICK",
+          "android_channel_id": "chatAppInFlutter"
         },
         "data": {"ChatRoomID": chatRoomID,
         "SenderToken" : senderToken,
