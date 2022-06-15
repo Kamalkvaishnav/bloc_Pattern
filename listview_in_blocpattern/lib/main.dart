@@ -56,10 +56,8 @@ void onClickedNotification(String? payload) {
   } else {
     tokenfromtemp = temp[0];
   }
-
   
-
-  print((temp[0]));
+  Navigator.pushNamed(navigatorKey.currentContext!, '/home');
   Navigator.of(navigatorKey.currentContext!).pushReplacement(MaterialPageRoute(
       builder: (context) => BlocProvider(
           create: (context) => ItemBloc(repository: ItemRepositoryImpl()),
@@ -100,6 +98,9 @@ class _MyAppState extends State<MyApp> {
             primarySwatch: Colors.blue,
             visualDensity: VisualDensity.adaptivePlatformDensity),
         home: const AuthanticationWrapper(),
+        routes: {
+          '/home': (context) => AuthanticationWrapper()
+        },
       ),
     );
   }
