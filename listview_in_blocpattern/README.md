@@ -1,4 +1,4 @@
-# listview_in_blocpattern
+# Multi-user chat app 
 
 A new Flutter project.
 
